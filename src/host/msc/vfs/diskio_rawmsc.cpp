@@ -110,6 +110,16 @@ esp_err_t ff_msc_register_raw_partition(BYTE pdrv, uint8_t lun)
     return ESP_OK;
 }
 
+BYTE ff_msc_get_pdrv_from_lun(uint8_t lun)
+{
+    for (int i = 0; i < FF_VOLUMES; i++) {
+        if (lun == ff_raw_handles[i]) {
+            return i;
+        }
+    }
+    return 0xff;
+}
+
 
 // BYTE ff_msc_get_pdrv_raw(const void* part_handle)
 // {
@@ -120,6 +130,16 @@ esp_err_t ff_msc_register_raw_partition(BYTE pdrv, uint8_t lun)
 //     }
 //     return 0xff;
 // }
+
+esp_err_t vfs_fat_rawmsc_unmount(const char* base_path, uint8_t lun)
+{
+    esp_err_t result = ESP_OK;
+    result = f_mount(NULL, base_path, 0); // passing in NULL will _un_mount the path
+    esp_vfs_fat_unregister_path(base_path);
+    BYTE pdrv = ff_msc_get_pdrv_from_lun(lun);
+    ff_diskio_unregister(pdrv);
+    return result;
+}
 
 esp_err_t vfs_fat_rawmsc_mount(const char* base_path,
     const esp_vfs_fat_mount_config_t* mount_config, uint8_t lun)

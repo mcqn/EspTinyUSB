@@ -30,12 +30,13 @@ private:
 
 public:
     USBmscDevice(const usb_config_desc_t* config_desc, USBhost*);
-    ~USBmscDevice();
+    virtual ~USBmscDevice();
 
     bool            init();
     void            reset();
     void            format();
     void            mount(char*, uint8_t lun = 0);
+    void            unmount(char*, uint8_t lun = 0);
     uint8_t         getMaxLUN();
     uint32_t        getBlockCount(uint8_t lun = 0);
     uint16_t        getBlockSize(uint8_t lun = 0);

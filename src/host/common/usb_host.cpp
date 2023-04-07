@@ -18,6 +18,14 @@ void _client_event_callback(const usb_host_client_event_msg_t *event_msg, void *
             host->open(event_msg);
         }
     }
+    else
+    {
+        ESP_LOGI("", "client event: %d, address: %d", event_msg->event, event_msg->new_dev.address);
+        if (host->_client_event_cb)
+        {
+            host->_client_event_cb(event_msg, arg);
+        }
+    }
 }
 
 static void client_async_seq_task(void *param)
@@ -26,7 +34,7 @@ static void client_async_seq_task(void *param)
     uint32_t event_flags;
     while (1)
     {
-        usb_host_client_handle_events(client_hdl, 1);
+        usb_host_client_handle_events(client_hdl, 100);
 
         if (ESP_OK == usb_host_lib_handle_events(1, &event_flags))
         {
@@ -37,6 +45,7 @@ static void client_async_seq_task(void *param)
             }
             if (event_flags & USB_HOST_LIB_EVENT_FLAGS_ALL_FREE)
             {
+                ESP_LOGI("", "All free");
                 break;
             }
         }

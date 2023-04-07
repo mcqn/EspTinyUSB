@@ -115,7 +115,8 @@ USBmscDevice::USBmscDevice(const usb_config_desc_t *config_desc, USBhost *host)
 
 USBmscDevice::~USBmscDevice()
 {
-    // TODO
+    esp_err_t err = usb_host_interface_release(_host->clientHandle(), _host->deviceHandle(), itf_num);
+    ESP_LOGI("", "interface release status: %d", err);
 }
 
 esp_err_t USBmscDevice::dealocate(uint8_t _size)
@@ -185,6 +186,13 @@ void USBmscDevice::mount(char *path, uint8_t lun)
         .allocation_unit_size = block_size[lun]};
     esp_err_t err = vfs_fat_rawmsc_mount(path, &mount_config, lun);
     ESP_LOGI("", "VFS mount status: %d", err);
+}
+
+void USBmscDevice::unmount(char *path, uint8_t lun)
+{
+    if(lun > _luns) return;
+    esp_err_t err = vfs_fat_rawmsc_unmount(path, lun);
+    ESP_LOGI("", "VFS unmount status: %d", err);
 }
 
 void USBmscDevice::reset()
